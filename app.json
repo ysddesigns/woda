@@ -7,6 +7,9 @@
     "icon": "./assets/images/icon.png",
     "scheme": "woda",
     "userInterfaceStyle": "automatic",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "icon": "./assets/expo.icon"
     },
@@ -39,6 +42,16 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e4fc0411-891e-4f2b-9f3c-a5cd8f677077"
+      }
+    },
+    "owner": "yusufbyusuf",
+    "updates": {
+      "url": "https://u.expo.dev/e4fc0411-891e-4f2b-9f3c-a5cd8f677077"
     }
   }
 }
