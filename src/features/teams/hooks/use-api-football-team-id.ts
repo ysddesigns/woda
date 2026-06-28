@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { isApiFootballConfigured } from '@/api/api-football-client';
+import { apiFootballRetry, isApiFootballConfigured } from '@/api/api-football-client';
 import { resolveTeamId } from '@/features/teams/lib/resolve-team-id';
 import type { TeamSummary } from '@/features/teams/types';
 import { STATIC_STALE_TIME } from '@/lib/query-client';
@@ -14,7 +14,7 @@ export function useApiFootballTeamId(team: TeamSummary | null): number | null | 
     queryFn: ({ signal }) => resolveTeamId(team!.id, team!.name, signal),
     enabled: configured && Boolean(team),
     staleTime: STATIC_STALE_TIME,
-    retry: 1,
+    retry: apiFootballRetry,
   });
 
   return configured && team ? query.data : null;

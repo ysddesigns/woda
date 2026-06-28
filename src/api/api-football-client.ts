@@ -31,6 +31,16 @@ export class ApiFootballError extends Error {
   }
 }
 
+/**
+ * TanStack Query `retry` option for API-Football queries. A 429 (per-minute rate limit) won't
+ * clear within a quick retry — retrying immediately just adds to the burst that caused it — so
+ * don't. Anything else gets one retry, same as the previous flat `retry: 1` everywhere.
+ */
+export function apiFootballRetry(failureCount: number, error: unknown): boolean {
+  if (error instanceof ApiFootballError && error.status === 429) return false;
+  return failureCount < 1;
+}
+
 let warnedMissingKey = false;
 
 export function isApiFootballConfigured(): boolean {

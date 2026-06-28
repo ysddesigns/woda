@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { isApiFootballConfigured } from '@/api/api-football-client';
+import { apiFootballRetry, isApiFootballConfigured } from '@/api/api-football-client';
 import { resolveFixtureId } from '@/features/matches/lib/resolve-fixture-id';
 import type { Match } from '@/features/matches/types';
 import { STATIC_STALE_TIME } from '@/lib/query-client';
@@ -19,7 +19,7 @@ export function useFixtureId(match: Match): number | null | undefined {
     queryFn: ({ signal }) => resolveFixtureId(match, signal),
     enabled: configured,
     staleTime: STATIC_STALE_TIME,
-    retry: 1,
+    retry: apiFootballRetry,
   });
 
   // undefined = still resolving, null = resolved but no match found, number = resolved fixture id.

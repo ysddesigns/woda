@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getEvents, isApiFootballConfigured } from '@/api/api-football-client';
+import { apiFootballRetry, getEvents, isApiFootballConfigured } from '@/api/api-football-client';
 import { useFixtureId } from '@/features/matches/hooks/use-fixture-id';
 import { teamNamesMatch } from '@/features/matches/lib/normalize-team-name';
 import type { Match } from '@/features/matches/types';
@@ -27,7 +27,7 @@ export function useMatchEvents(match: Match): UseMatchEventsResult {
     queryFn: ({ signal }) => getEvents(fixtureId!, signal).then((r) => r.response),
     enabled: configured && typeof fixtureId === 'number',
     staleTime,
-    retry: 1,
+    retry: apiFootballRetry,
   });
 
   if (!configured) return { status: 'unconfigured', events: [] };

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getSquad, isApiFootballConfigured } from '@/api/api-football-client';
+import { apiFootballRetry, getSquad, isApiFootballConfigured } from '@/api/api-football-client';
 import { useApiFootballTeamId } from '@/features/teams/hooks/use-api-football-team-id';
 import type { TeamSummary } from '@/features/teams/types';
 import { STATIC_STALE_TIME } from '@/lib/query-client';
@@ -21,7 +21,7 @@ export function useTeamSquad(team: TeamSummary | null): UseTeamSquadResult {
     queryFn: ({ signal }) => getSquad(apiTeamId!, signal).then((r) => r.response[0]?.players ?? []),
     enabled: configured && typeof apiTeamId === 'number',
     staleTime: STATIC_STALE_TIME,
-    retry: 1,
+    retry: apiFootballRetry,
   });
 
   if (!configured) return { status: 'unconfigured', players: [] };
