@@ -73,12 +73,18 @@ export function searchTeam(name: string, signal?: AbortSignal): Promise<AfTeamSe
   return afGet(`/teams?search=${encodeURIComponent(name)}`, signal);
 }
 
-export function getFixturesByTeamAndDate(
+/**
+ * Filters by a date range rather than a single exact date — worldcup26.ir's kickoff time has
+ * no timezone marker, so the calendar day we compute from it can land a day off from
+ * API-Football's own UTC-based date filtering for matches near midnight. A range absorbs that.
+ */
+export function getFixturesByTeamInRange(
   apiTeamId: number,
-  isoDate: string,
+  fromIsoDate: string,
+  toIsoDate: string,
   signal?: AbortSignal,
 ): Promise<AfFixturesResponse> {
-  return afGet(`/fixtures?team=${apiTeamId}&date=${isoDate}`, signal);
+  return afGet(`/fixtures?team=${apiTeamId}&from=${fromIsoDate}&to=${toIsoDate}`, signal);
 }
 
 export function getLineups(fixtureId: number, signal?: AbortSignal): Promise<AfLineupsResponse> {
