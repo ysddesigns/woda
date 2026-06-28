@@ -1,9 +1,12 @@
 import { SegmentedControl } from '@expo/ui/community/segmented-control';
 import Constants from 'expo-constants';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { isEnabled } from '@/lib/feature-flags';
+import { requestNotificationPermission } from '@/lib/notifications';
 import { type ThemePreference, useSettingsStore } from '@/store/settings-store';
 
 const THEME_VALUES: ThemePreference[] = ['system', 'light', 'dark'];
@@ -13,7 +16,33 @@ export default function SettingsScreen() {
   const theme = useTheme();
   const themePreference = useSettingsStore((s) => s.themePreference);
   const setThemePreference = useSettingsStore((s) => s.setThemePreference);
+  const notificationsEnabled = useSettingsStore((s) => s.notificationsEnabled);
+  const setNotificationsEnabled = useSettingsStore((s) => s.setNotificationsEnabled);
+  const [requesting, setRequesting] = useState(false);
   const version = Constants.expoConfig?.version ?? '1.0.0';
+
+  async function onToggleNotifications(next: boolean) {
+    if (!next) {
+      setNotificationsEnabled(false);
+      return;
+    }
+    setRequesting(true);
+    const result = await requestNotificationPermission();
+    setRequesting(false);
+
+    if (result === 'granted') {
+      setNotificationsEnabled(true);
+      return;
+    }
+    if (result === 'unsupported') {
+      Alert.alert('Not available', 'Notifications require a physical device.');
+      return;
+    }
+    Alert.alert(
+      'Notifications off',
+      'Enable notifications for Woda in your device Settings to get match alerts.',
+    );
+  }
 
   return (
     <ScrollView
@@ -31,6 +60,23 @@ export default function SettingsScreen() {
           }}
         />
       </Section>
+
+      {isEnabled('notifications') ? (
+        <Section title="Notifications">
+          <View style={styles.row}>
+            <Text style={[styles.rowLabel, { color: theme.text }]}>Match alerts</Text>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={onToggleNotifications}
+              disabled={requesting}
+              trackColor={{ false: theme.border, true: theme.primary }}
+            />
+          </View>
+          <Text style={[styles.note, { color: theme.textHint }]}>
+            Get notified for kickoffs and goals once favorite teams are available.
+          </Text>
+        </Section>
+      ) : null}
 
       <Section title="About">
         <Row label="Version" value={version} />

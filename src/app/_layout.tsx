@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppTabs from '@/components/app-tabs';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useNotificationsSetup } from '@/hooks/use-notifications-setup';
 import { asyncStoragePersister, queryClient } from '@/lib/query-client';
 
 function navTheme(scheme: 'light' | 'dark') {
@@ -27,6 +28,7 @@ function navTheme(scheme: 'light' | 'dark') {
 
 export default function RootLayout() {
   const scheme = useColorScheme();
+  useNotificationsSetup();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
