@@ -17,8 +17,16 @@ export type FeatureFlags = {
   venues: boolean;
   search: boolean;
   shareMatch: boolean;
+  // Phase 2 enrichment — depends on third-party API keys, not just app code. Kill instantly
+  // via remote override if API-Football/OpenWeatherMap has an outage or quota issue.
+  matchLineups: boolean;
+  matchStats: boolean;
+  matchEvents: boolean;
+  teamRoster: boolean;
+  venueWeather: boolean;
   // Requires a binary build (native module) before enabling:
   notifications: boolean;
+  venueMap: boolean;
 };
 
 export const DEFAULT_FLAGS: FeatureFlags = {
@@ -28,8 +36,15 @@ export const DEFAULT_FLAGS: FeatureFlags = {
   venues: true,
   search: true,
   shareMatch: true,
+  matchLineups: true,
+  matchStats: true,
+  matchEvents: true,
+  teamRoster: true,
+  venueWeather: true,
   // expo-notifications native module shipped in this binary build — flagged on by default.
   notifications: true,
+  // react-native-maps/expo-location added in this build — flip to true once that build ships.
+  venueMap: false,
 };
 
 let activeFlags: FeatureFlags = { ...DEFAULT_FLAGS };

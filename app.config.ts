@@ -23,6 +23,7 @@ const config: ExpoConfig = {
     // every build/submission. Revisit if the app ever adds its own crypto.
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
+      NSLocationWhenInUseUsageDescription: 'Used to show how far you are from a World Cup venue. Optional — only requested when you tap "Show my distance".',
     },
   },
   android: {
@@ -61,6 +62,12 @@ const config: ExpoConfig = {
         icon: './assets/images/android-icon-monochrome.png',
         color: '#15803D',
         defaultChannel: 'default',
+      },
+    ],
+    [
+      'expo-location',
+      {
+        locationWhenInUsePermission: 'Used to show how far you are from a World Cup venue. Optional — only requested when you tap "Show my distance".',
       },
     ],
   ],

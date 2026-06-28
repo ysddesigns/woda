@@ -25,3 +25,17 @@ export function groupByBucket(matches: Match[], now: Date = new Date()) {
   buckets.upcoming.sort((a, b) => a.kickoff.getTime() - b.kickoff.getTime());
   return buckets;
 }
+
+export type MatchFilters = {
+  group: string | null;
+  stadium: string | null;
+};
+
+/** Narrows an already-bucketed list by group and/or stadium. Composes after groupByBucket(). */
+export function filterMatches(matches: Match[], filters: MatchFilters): Match[] {
+  return matches.filter((match) => {
+    if (filters.group && match.group !== filters.group) return false;
+    if (filters.stadium && match.venue?.name !== filters.stadium) return false;
+    return true;
+  });
+}

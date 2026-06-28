@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import type { VenueSummary } from '@/features/venues/types';
@@ -8,7 +9,15 @@ export function VenueRow({ venue }: { venue: VenueSummary }) {
   const theme = useTheme();
 
   return (
-    <View style={[styles.row, { backgroundColor: theme.card, borderColor: theme.border }]}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${venue.name}, ${venue.city}`}
+      onPress={() => router.push({ pathname: '/teams/venue/[id]', params: { id: venue.id } })}
+      style={({ pressed }) => [
+        styles.row,
+        { backgroundColor: theme.card, borderColor: theme.border },
+        pressed && styles.pressed,
+      ]}>
       <View style={styles.main}>
         <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
           {venue.name}
@@ -23,7 +32,7 @@ export function VenueRow({ venue }: { venue: VenueSummary }) {
           <Text style={[styles.regionText, { color: theme.textSecondary }]}>{venue.region}</Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -37,6 +46,9 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
+  },
+  pressed: {
+    opacity: 0.85,
   },
   main: {
     flex: 1,

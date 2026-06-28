@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
@@ -13,7 +14,15 @@ export function TeamRow({ team }: { team: TeamSummary }) {
   const toggleTeam = useFavoritesStore((s) => s.toggleTeam);
 
   return (
-    <View style={[styles.row, { backgroundColor: theme.card, borderColor: theme.border }]}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`View ${team.name} team details`}
+      onPress={() => router.push({ pathname: '/teams/team/[id]', params: { id: team.id } })}
+      style={({ pressed }) => [
+        styles.row,
+        { backgroundColor: theme.card, borderColor: theme.border },
+        pressed && styles.pressed,
+      ]}>
       {team.flag ? (
         <Image source={{ uri: team.flag }} style={styles.flag} contentFit="cover" />
       ) : (
@@ -39,7 +48,7 @@ export function TeamRow({ team }: { team: TeamSummary }) {
           color={team.isFavorite ? theme.primary : theme.textHint}
         />
       </Pressable>
-    </View>
+    </Pressable>
   );
 }
 
@@ -53,6 +62,9 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
+  },
+  pressed: {
+    opacity: 0.85,
   },
   flag: {
     width: 32,

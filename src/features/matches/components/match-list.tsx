@@ -24,6 +24,8 @@ type MatchListProps = {
   onRetry: () => void;
   refreshing: boolean;
   onRefresh: () => void;
+  /** True when a group/stadium filter has narrowed the results, to adjust the empty-state copy. */
+  filtersActive?: boolean;
 };
 
 export function MatchList({
@@ -35,6 +37,7 @@ export function MatchList({
   onRetry,
   refreshing,
   onRefresh,
+  filtersActive,
 }: MatchListProps) {
   const theme = useTheme();
   const renderItem = useCallback(({ item }: { item: Match }) => <MatchCard match={item} />, []);
@@ -62,7 +65,9 @@ export function MatchList({
     );
   }
 
-  const empty = EMPTY_COPY[bucket];
+  const empty = filtersActive
+    ? { icon: 'filter-outline' as const, title: 'No matches match these filters', description: 'Try a different group or stadium.' }
+    : EMPTY_COPY[bucket];
   return (
     <FlatList
       data={matches}
