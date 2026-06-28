@@ -1,8 +1,8 @@
 import { ApiError } from '@/api/client';
 import { StyleSheet, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
 import { BracketBoard } from '@/features/bracket/components/bracket-board';
+import { BracketHeader } from '@/features/bracket/components/bracket-header';
 import { useBracket } from '@/features/bracket/hooks/use-bracket';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -13,12 +13,18 @@ function errorMessage(error: unknown): string {
   return 'We couldn’t reach the scores service. Please try again.';
 }
 
+function subtitle(rounds: { key: string }[]): string {
+  const isFinalSet = rounds[rounds.length - 1]?.key === 'f';
+  return isFinalSet ? 'The final is set.' : 'One champion will be crowned.';
+}
+
 export default function BracketScreen() {
   const theme = useTheme();
   const { rounds, isLoading, isError, error, refetch, isRefetching } = useBracket();
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]} collapsable={false}>
+      <BracketHeader subtitle={subtitle(rounds)} />
       <BracketBoard
         rounds={rounds}
         isLoading={isLoading}
@@ -35,6 +41,5 @@ export default function BracketScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    paddingTop: Spacing.md,
   },
 });

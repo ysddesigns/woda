@@ -1,53 +1,113 @@
-import { Image } from 'expo-image';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 
 import { FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import { StatusBadge } from '@/features/matches/components/status-badge';
 import type { Match, MatchTeam } from '@/features/matches/types';
 import { useTheme } from '@/hooks/use-theme';
 
-const CARD_WIDTH = 220;
+const CARD_WIDTH = 224;
+const STAGGER_STEP_MS = 60;
+const STAGGER_CAP = 5;
 
-export function BracketMatchCard({ match }: { match: Match }) {
+export function BracketMatchCard({
+  match,
+  index = 0,
+  isFinal = false,
+}: {
+  match: Match;
+  index?: number;
+  isFinal?: boolean;
+}) {
   const theme = useTheme();
   const showScore = match.status !== 'upcoming';
+  const isDecided =
+    match.status === 'finished' && match.homeScore !== null && match.awayScore !== null && match.homeScore !== match.awayScore;
+  const homeWon = isDecided && (match.homeScore as number) > (match.awayScore as number);
+  const awayWon = isDecided && (match.awayScore as number) > (match.homeScore as number);
+
+  const delay = Math.min(index, STAGGER_CAP) * STAGGER_STEP_MS;
+
+  const borderColor = match.status === 'live' ? theme.live : isFinal ? theme.primary : theme.border;
 
   return (
-    <Link href={{ pathname: '/game/[id]', params: { id: match.id } }} asChild>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${match.home.name} versus ${match.away.name}`}
-        onPressIn={() => Haptics.selectionAsync()}
-        style={({ pressed }) => [
-          styles.card,
-          { backgroundColor: theme.card, borderColor: theme.border, width: CARD_WIDTH },
-          pressed && styles.pressed,
-        ]}>
-        <View style={styles.statusRow}>
-          <StatusBadge match={match} />
-        </View>
-        <TeamRow team={match.home} score={showScore ? match.homeScore : null} />
-        <TeamRow team={match.away} score={showScore ? match.awayScore : null} />
-      </Pressable>
-    </Link>
+    <Animated.View entering={FadeInRight.duration(300).delay(delay)}>
+      <Link href={{ pathname: '/game/[id]', params: { id: match.id } }} asChild>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${match.home.name} versus ${match.away.name}`}
+          onPressIn={() => Haptics.selectionAsync()}
+          style={({ pressed }) => [
+            styles.card,
+            {
+              backgroundColor: theme.card,
+              borderColor,
+              borderWidth: match.status === 'live' || isFinal ? 1.5 : StyleSheet.hairlineWidth,
+              width: CARD_WIDTH,
+            },
+            isFinal && { backgroundColor: theme.backgroundElement },
+            pressed && styles.pressed,
+          ]}>
+          {isFinal ? (
+            <View style={styles.finalBadge}>
+              <Ionicons name="trophy" size={12} color={theme.primary} />
+              <Text style={[styles.finalBadgeText, { color: theme.primary }]}>FINAL</Text>
+            </View>
+          ) : null}
+          <View style={styles.statusRow}>
+            <StatusBadge match={match} />
+          </View>
+          <TeamRow team={match.home} score={showScore ? match.homeScore : null} won={homeWon} lost={isDecided && !homeWon} />
+          <TeamRow team={match.away} score={showScore ? match.awayScore : null} won={awayWon} lost={isDecided && !awayWon} />
+        </Pressable>
+      </Link>
+    </Animated.View>
   );
 }
 
-function TeamRow({ team, score }: { team: MatchTeam; score: number | null }) {
+function TeamRow({
+  team,
+  score,
+  won,
+  lost,
+}: {
+  team: MatchTeam;
+  score: number | null;
+  won: boolean;
+  lost: boolean;
+}) {
   const theme = useTheme();
+  const dimmed = lost;
+
   return (
-    <View style={styles.teamRow}>
+    <View style={[styles.teamRow, won && { backgroundColor: theme.primary + '14' }]}>
       {team.flag ? (
-        <Image source={{ uri: team.flag }} style={styles.flag} contentFit="cover" />
+        <Image source={{ uri: team.flag }} style={[styles.flag, dimmed && styles.dimmed]} contentFit="cover" />
       ) : (
-        <View style={[styles.flag, { backgroundColor: theme.backgroundElement }]} />
+        <View style={[styles.flag, { backgroundColor: theme.backgroundElement }, dimmed && styles.dimmed]} />
       )}
-      <Text style={[styles.teamName, { color: theme.text }]} numberOfLines={1}>
+      <Text
+        style={[
+          styles.teamName,
+          { color: dimmed ? theme.textSecondary : theme.text },
+          won && { fontWeight: FontWeight.bold },
+        ]}
+        numberOfLines={1}>
         {team.name}
       </Text>
-      <Text style={[styles.score, { color: theme.text }]}>{score ?? (team.isPlaceholder ? '' : '–')}</Text>
+      {won ? <Ionicons name="checkmark-circle" size={14} color={theme.primary} style={styles.wonIcon} /> : null}
+      <Text
+        style={[
+          styles.score,
+          { color: dimmed ? theme.textSecondary : theme.text },
+          won && { color: theme.primary, fontWeight: FontWeight.bold },
+        ]}>
+        {score ?? (team.isPlaceholder ? '' : '–')}
+      </Text>
     </View>
   );
 }
@@ -55,7 +115,6 @@ function TeamRow({ team, score }: { team: MatchTeam; score: number | null }) {
 const styles = StyleSheet.create({
   card: {
     borderRadius: Radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
     borderCurve: 'continuous',
     padding: Spacing.md,
     gap: Spacing.sm,
@@ -67,26 +126,46 @@ const styles = StyleSheet.create({
   statusRow: {
     alignItems: 'flex-start',
   },
+  finalBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  finalBadgeText: {
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.bold,
+    letterSpacing: 0.6,
+  },
   teamRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.xs,
+    borderRadius: Radius.sm,
   },
   flag: {
     width: 22,
     height: 16,
     borderRadius: 2,
   },
+  dimmed: {
+    opacity: 0.55,
+  },
   teamName: {
     flex: 1,
     fontSize: FontSize.sm,
     fontWeight: FontWeight.medium,
   },
+  wonIcon: {
+    marginRight: -Spacing.xs,
+  },
   score: {
-    fontSize: FontSize.sm,
+    fontSize: FontSize.base,
     fontWeight: FontWeight.bold,
     fontVariant: ['tabular-nums'],
-    minWidth: 16,
+    minWidth: 18,
     textAlign: 'right',
   },
 });
