@@ -11,9 +11,11 @@
       "policy": "appVersion"
     },
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.kashify.woda"
     },
     "android": {
+      "package": "com.kashify.woda",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
