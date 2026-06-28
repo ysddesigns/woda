@@ -11,7 +11,14 @@ export async function resolveTeamId(woda26TeamId: string, teamName: string, sign
 
   const result = await searchTeam(teamName, signal);
   const match = result.response.find((r) => teamNamesMatch(r.team.name, teamName));
-  if (!match) return null;
+  if (!match) {
+    if (__DEV__) {
+      console.warn(
+        `[resolve-team-id] No API-Football match for "${teamName}" — candidates: ${result.response.map((r) => r.team.name).join(', ') || '(none returned)'}`,
+      );
+    }
+    return null;
+  }
 
   await setCachedId(NAMESPACE, woda26TeamId, match.team.id);
   return match.team.id;

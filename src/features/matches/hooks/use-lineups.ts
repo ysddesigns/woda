@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getLineups, isApiFootballConfigured } from '@/api/api-football-client';
-import { resolveFixtureId } from '@/features/matches/lib/resolve-fixture-id';
+import { useFixtureId } from '@/features/matches/hooks/use-fixture-id';
 import { teamNamesMatch } from '@/features/matches/lib/normalize-team-name';
 import type { Match } from '@/features/matches/types';
 import { STATIC_STALE_TIME } from '@/lib/query-client';
@@ -21,22 +21,19 @@ function toPlayer(p: { player: { id: number; name: string; number: number; pos: 
 
 export function useLineups(match: Match): UseLineupsResult {
   const configured = isApiFootballConfigured();
+  const fixtureId = useFixtureId(match);
 
   const query = useQuery({
-    queryKey: ['lineups', match.id],
-    queryFn: async ({ signal }) => {
-      const fixtureId = await resolveFixtureId(match, signal);
-      if (fixtureId === null) return null;
-      const response = await getLineups(fixtureId, signal);
-      return response.response;
-    },
-    enabled: configured,
+    queryKey: ['lineups', fixtureId],
+    queryFn: ({ signal }) => getLineups(fixtureId!, signal).then((r) => r.response),
+    enabled: configured && typeof fixtureId === 'number',
     staleTime: STATIC_STALE_TIME,
     retry: 1,
   });
 
   if (!configured) return { status: 'unconfigured', lineups: null };
-  if (query.isLoading) return { status: 'loading', lineups: null };
+  if (fixtureId === undefined || query.isLoading) return { status: 'loading', lineups: null };
+  if (fixtureId === null) return { status: 'unavailable', lineups: null };
   if (query.isError) return { status: 'error', lineups: null };
   if (!query.data || query.data.length < 2) return { status: 'unavailable', lineups: null };
 

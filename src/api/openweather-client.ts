@@ -14,8 +14,17 @@ export type ForecastEntry = {
 
 type ForecastResponse = { list: ForecastEntry[] };
 
+let warnedMissingKey = false;
+
 export function isWeatherConfigured(): boolean {
-  return Boolean(process.env.EXPO_PUBLIC_OPENWEATHER_KEY);
+  const configured = Boolean(process.env.EXPO_PUBLIC_OPENWEATHER_KEY);
+  if (!configured && __DEV__ && !warnedMissingKey) {
+    warnedMissingKey = true;
+    console.warn(
+      '[openweather] EXPO_PUBLIC_OPENWEATHER_KEY is not set in this build — venue weather will stay in its "not configured" state. Local dev: add it to .env and restart Metro with --clear. EAS builds: register it with `eas env:create`.',
+    );
+  }
+  return configured;
 }
 
 export async function getForecast(lat: number, lng: number, signal?: AbortSignal): Promise<ForecastEntry[]> {
@@ -24,7 +33,13 @@ export async function getForecast(lat: number, lng: number, signal?: AbortSignal
 
   const url = `${BASE_URL}/forecast?lat=${lat}&lon=${lng}&units=metric&appid=${key}`;
   const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error(`OpenWeatherMap request failed (${response.status})`);
+  if (!response.ok) {
+    if (__DEV__) {
+      const body = await response.text().catch(() => '');
+      console.warn(`[openweather] forecast -> ${response.status}: ${body.slice(0, 300)}`);
+    }
+    throw new Error(`OpenWeatherMap request failed (${response.status})`);
+  }
 
   const data = (await response.json()) as ForecastResponse;
   return data.list ?? [];

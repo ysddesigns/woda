@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getSquad, isApiFootballConfigured } from '@/api/api-football-client';
-import { resolveTeamId } from '@/features/teams/lib/resolve-team-id';
+import { useApiFootballTeamId } from '@/features/teams/hooks/use-api-football-team-id';
 import type { TeamSummary } from '@/features/teams/types';
 import { STATIC_STALE_TIME } from '@/lib/query-client';
 
@@ -14,22 +14,19 @@ export type UseTeamSquadResult = {
 
 export function useTeamSquad(team: TeamSummary | null): UseTeamSquadResult {
   const configured = isApiFootballConfigured();
+  const apiTeamId = useApiFootballTeamId(team);
 
   const query = useQuery({
-    queryKey: ['team-squad', team?.id],
-    queryFn: async ({ signal }) => {
-      const apiTeamId = await resolveTeamId(team!.id, team!.name, signal);
-      if (apiTeamId === null) return null;
-      const response = await getSquad(apiTeamId, signal);
-      return response.response[0]?.players ?? [];
-    },
-    enabled: configured && Boolean(team),
+    queryKey: ['team-squad', apiTeamId],
+    queryFn: ({ signal }) => getSquad(apiTeamId!, signal).then((r) => r.response[0]?.players ?? []),
+    enabled: configured && typeof apiTeamId === 'number',
     staleTime: STATIC_STALE_TIME,
     retry: 1,
   });
 
   if (!configured) return { status: 'unconfigured', players: [] };
-  if (query.isLoading) return { status: 'loading', players: [] };
+  if (apiTeamId === undefined || query.isLoading) return { status: 'loading', players: [] };
+  if (apiTeamId === null) return { status: 'unavailable', players: [] };
   if (query.isError) return { status: 'error', players: [] };
   if (!query.data || query.data.length === 0) return { status: 'unavailable', players: [] };
 

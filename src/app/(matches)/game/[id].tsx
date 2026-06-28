@@ -75,7 +75,7 @@ export default function GameDetailScreen() {
           <Text style={styles.brand}>FIFA World Cup 26™</Text>
         </View>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: Spacing.lg + insets.bottom }]}>
         <View
           style={[
             styles.scoreboard,

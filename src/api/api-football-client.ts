@@ -31,8 +31,17 @@ export class ApiFootballError extends Error {
   }
 }
 
+let warnedMissingKey = false;
+
 export function isApiFootballConfigured(): boolean {
-  return Boolean(process.env.EXPO_PUBLIC_API_FOOTBALL_KEY);
+  const configured = Boolean(process.env.EXPO_PUBLIC_API_FOOTBALL_KEY);
+  if (!configured && __DEV__ && !warnedMissingKey) {
+    warnedMissingKey = true;
+    console.warn(
+      '[api-football] EXPO_PUBLIC_API_FOOTBALL_KEY is not set in this build — lineups/stats/events/roster/coach will stay in their "not available" state. Local dev: add it to .env and restart Metro with --clear. EAS builds: register it with `eas env:create`.',
+    );
+  }
+  return configured;
 }
 
 async function afGet<T>(path: string, signal?: AbortSignal): Promise<T> {
@@ -50,6 +59,10 @@ async function afGet<T>(path: string, signal?: AbortSignal): Promise<T> {
   }
 
   if (!response.ok) {
+    if (__DEV__) {
+      const body = await response.text().catch(() => '');
+      console.warn(`[api-football] ${path} -> ${response.status}: ${body.slice(0, 300)}`);
+    }
     throw new ApiFootballError(`API-Football request failed (${response.status})`, response.status);
   }
 

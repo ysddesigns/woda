@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getEvents, isApiFootballConfigured } from '@/api/api-football-client';
-import { resolveFixtureId } from '@/features/matches/lib/resolve-fixture-id';
+import { useFixtureId } from '@/features/matches/hooks/use-fixture-id';
 import { teamNamesMatch } from '@/features/matches/lib/normalize-team-name';
 import type { Match } from '@/features/matches/types';
 import { LIVE_STALE_TIME } from '@/lib/query-client';
@@ -19,23 +19,20 @@ export type UseMatchEventsResult = {
 /** Cards, substitutions, and VAR reviews only — goals already come from worldcup26.ir scorer data. */
 export function useMatchEvents(match: Match): UseMatchEventsResult {
   const configured = isApiFootballConfigured();
+  const fixtureId = useFixtureId(match);
   const staleTime = match.status === 'live' ? LIVE_STALE_TIME : 1000 * 60 * 60 * 6;
 
   const query = useQuery({
-    queryKey: ['match-events', match.id],
-    queryFn: async ({ signal }) => {
-      const fixtureId = await resolveFixtureId(match, signal);
-      if (fixtureId === null) return null;
-      const response = await getEvents(fixtureId, signal);
-      return response.response;
-    },
-    enabled: configured,
+    queryKey: ['match-events', fixtureId],
+    queryFn: ({ signal }) => getEvents(fixtureId!, signal).then((r) => r.response),
+    enabled: configured && typeof fixtureId === 'number',
     staleTime,
     retry: 1,
   });
 
   if (!configured) return { status: 'unconfigured', events: [] };
-  if (query.isLoading) return { status: 'loading', events: [] };
+  if (fixtureId === undefined || query.isLoading) return { status: 'loading', events: [] };
+  if (fixtureId === null) return { status: 'unavailable', events: [] };
   if (query.isError) return { status: 'error', events: [] };
   if (!query.data) return { status: 'unavailable', events: [] };
 

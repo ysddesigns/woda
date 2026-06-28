@@ -31,7 +31,14 @@ export async function resolveFixtureId(match: Match, signal?: AbortSignal): Prom
   const fixture = fixtures.response.find(
     (f) => teamNamesMatch(f.teams.away.name, match.away.name) || teamNamesMatch(f.teams.home.name, match.away.name),
   );
-  if (!fixture) return null;
+  if (!fixture) {
+    if (__DEV__) {
+      console.warn(
+        `[resolve-fixture-id] No fixture for ${match.home.name} vs ${match.away.name} on ${isoDate} — API-Football returned ${fixtures.response.length} fixture(s) for team ${homeApiTeamId} that day.`,
+      );
+    }
+    return null;
+  }
 
   await setCachedId(NAMESPACE, match.id, fixture.fixture.id);
   return fixture.fixture.id;

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getStatistics, isApiFootballConfigured } from '@/api/api-football-client';
-import { resolveFixtureId } from '@/features/matches/lib/resolve-fixture-id';
+import { useFixtureId } from '@/features/matches/hooks/use-fixture-id';
 import { teamNamesMatch } from '@/features/matches/lib/normalize-team-name';
 import type { Match } from '@/features/matches/types';
 import { LIVE_STALE_TIME } from '@/lib/query-client';
@@ -15,24 +15,21 @@ export type UseMatchStatsResult = {
 
 export function useMatchStats(match: Match): UseMatchStatsResult {
   const configured = isApiFootballConfigured();
+  const fixtureId = useFixtureId(match);
   // Stats only change while the match is in progress — keep it fresh then, cache longer once final.
   const staleTime = match.status === 'live' ? LIVE_STALE_TIME : 1000 * 60 * 60 * 6;
 
   const query = useQuery({
-    queryKey: ['match-stats', match.id],
-    queryFn: async ({ signal }) => {
-      const fixtureId = await resolveFixtureId(match, signal);
-      if (fixtureId === null) return null;
-      const response = await getStatistics(fixtureId, signal);
-      return response.response;
-    },
-    enabled: configured,
+    queryKey: ['match-stats', fixtureId],
+    queryFn: ({ signal }) => getStatistics(fixtureId!, signal).then((r) => r.response),
+    enabled: configured && typeof fixtureId === 'number',
     staleTime,
     retry: 1,
   });
 
   if (!configured) return { status: 'unconfigured', stats: [] };
-  if (query.isLoading) return { status: 'loading', stats: [] };
+  if (fixtureId === undefined || query.isLoading) return { status: 'loading', stats: [] };
+  if (fixtureId === null) return { status: 'unavailable', stats: [] };
   if (query.isError) return { status: 'error', stats: [] };
   if (!query.data || query.data.length < 2) return { status: 'unavailable', stats: [] };
 
