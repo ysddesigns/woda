@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useCallback } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -8,10 +9,10 @@ import { MatchCardSkeleton } from '@/features/matches/components/match-card-skel
 import type { Match, MatchBucket } from '@/features/matches/types';
 import { useTheme } from '@/hooks/use-theme';
 
-const EMPTY_COPY: Record<MatchBucket, { emoji: string; title: string; description: string }> = {
-  past: { emoji: '🏁', title: 'No past matches', description: 'Completed matches will show up here.' },
-  today: { emoji: '📅', title: 'No matches today', description: 'Check Upcoming for the next fixtures.' },
-  upcoming: { emoji: '⏳', title: 'No upcoming matches', description: "You're all caught up." },
+const EMPTY_COPY: Record<MatchBucket, { icon: keyof typeof Ionicons.glyphMap; title: string; description: string }> = {
+  past: { icon: 'flag-outline', title: 'No past matches', description: 'Completed matches will show up here.' },
+  today: { icon: 'calendar-outline', title: 'No matches today', description: 'Check Upcoming for the next fixtures.' },
+  upcoming: { icon: 'time-outline', title: 'No upcoming matches', description: "You're all caught up." },
 };
 
 type MatchListProps = {
@@ -52,7 +53,7 @@ export function MatchList({
   if (isError) {
     return (
       <StateView
-        emoji="😕"
+        icon="cloud-offline-outline"
         title="Couldn't load matches"
         description={errorMessage}
         actionLabel="Try Again"
@@ -69,7 +70,7 @@ export function MatchList({
       keyExtractor={keyExtractor}
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={[styles.content, matches.length === 0 && styles.contentEmpty]}
-      ListEmptyComponent={<StateView emoji={empty.emoji} title={empty.title} description={empty.description} />}
+      ListEmptyComponent={<StateView icon={empty.icon} title={empty.title} description={empty.description} />}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.textSecondary} />
       }

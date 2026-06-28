@@ -1,25 +1,26 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { FontSize, FontWeight, Spacing } from '@/constants/theme';
+import { FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type StateViewProps = {
-  emoji: string;
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description?: string;
   actionLabel?: string;
   onAction?: () => void;
 };
 
-/** Shared empty/error state (DESIGN_RULES §5): emoji → title → description → optional CTA. */
-export function StateView({ emoji, title, description, actionLabel, onAction }: StateViewProps) {
+/** Shared empty/error state (DESIGN_RULES §5): icon → title → description → optional CTA. */
+export function StateView({ icon, title, description, actionLabel, onAction }: StateViewProps) {
   const theme = useTheme();
   return (
     <View style={styles.container}>
-      <Text style={styles.emoji} accessibilityElementsHidden>
-        {emoji}
-      </Text>
+      <View style={[styles.iconWrap, { backgroundColor: theme.backgroundElement }]}>
+        <Ionicons name={icon} size={32} color={theme.textSecondary} />
+      </View>
       <Text style={[styles.title, { color: theme.text }]} selectable>
         {title}
       </Text>
@@ -46,8 +47,12 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing['5xl'],
     gap: Spacing.sm,
   },
-  emoji: {
-    fontSize: 48,
+  iconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: Spacing.xs,
   },
   title: {

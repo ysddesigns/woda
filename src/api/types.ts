@@ -5,7 +5,6 @@
  */
 
 export type ApiTeam = {
-  _id: string;
   id: string;
   name_en: string;
   name_fa: string;
@@ -16,7 +15,6 @@ export type ApiTeam = {
 };
 
 export type ApiGame = {
-  _id: string;
   id: string;
   home_team_id: string; // "0" when undetermined (knockout placeholder)
   away_team_id: string;
@@ -41,7 +39,6 @@ export type ApiGame = {
 };
 
 export type ApiStadium = {
-  _id: string;
   id: string;
   name_en: string;
   name_fa: string;

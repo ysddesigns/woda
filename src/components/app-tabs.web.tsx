@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FontSize, FontWeight, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-/** Simple web tab bar mirroring the native Matches + Settings tabs. */
+/** Simple web tab bar mirroring the native Matches/Standings/Bracket/Teams/Settings tabs. */
 export default function AppTabs() {
   const theme = useTheme();
   return (
@@ -16,6 +16,15 @@ export default function AppTabs() {
           <View style={styles.inner}>
             <TabTrigger name="matches" href="/" asChild>
               <TabButton>Matches</TabButton>
+            </TabTrigger>
+            <TabTrigger name="standings" href="/standings/index" asChild>
+              <TabButton>Standings</TabButton>
+            </TabTrigger>
+            <TabTrigger name="bracket" href="/bracket/index" asChild>
+              <TabButton>Bracket</TabButton>
+            </TabTrigger>
+            <TabTrigger name="teams" href="/teams/index" asChild>
+              <TabButton>Teams</TabButton>
             </TabTrigger>
             <TabTrigger name="settings" href="/settings" asChild>
               <TabButton>Settings</TabButton>

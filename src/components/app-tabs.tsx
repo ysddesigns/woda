@@ -3,8 +3,8 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTheme } from '@/hooks/use-theme';
 
 /**
- * Bottom navigation. MVP ships Matches + Settings; Phase-2 tabs (Standings, Bracket, Teams)
- * are added here later via OTA — tabs must stay static (≤5 on Android).
+ * Bottom navigation. Ships Matches, Standings, Bracket, Teams, Settings — 5 tabs, the cap
+ * for NativeTabs on Android. Venues lives inside the Teams tab; Search is an in-app modal.
  */
 export default function AppTabs() {
   const theme = useTheme();
@@ -14,6 +14,21 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="(matches)">
         <NativeTabs.Trigger.Icon sf="soccerball" md="sports_soccer" />
         <NativeTabs.Trigger.Label>Matches</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="standings">
+        <NativeTabs.Trigger.Icon sf="list.number" md="leaderboard" />
+        <NativeTabs.Trigger.Label>Standings</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="bracket">
+        <NativeTabs.Trigger.Icon sf="trophy" md="emoji_events" />
+        <NativeTabs.Trigger.Label>Bracket</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="teams">
+        <NativeTabs.Trigger.Icon sf="person.2" md="groups" />
+        <NativeTabs.Trigger.Label>Teams</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="settings">

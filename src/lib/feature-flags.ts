@@ -22,12 +22,12 @@ export type FeatureFlags = {
 };
 
 export const DEFAULT_FLAGS: FeatureFlags = {
-  standings: false,
-  bracket: false,
-  teams: false,
-  venues: false,
-  search: false,
-  shareMatch: false,
+  standings: true,
+  bracket: true,
+  teams: true,
+  venues: true,
+  search: true,
+  shareMatch: true,
   // expo-notifications native module shipped in this binary build — flagged on by default.
   notifications: true,
 };

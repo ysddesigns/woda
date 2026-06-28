@@ -11,39 +11,40 @@ import '@/global.css';
 import { Platform } from 'react-native';
 
 // ── Color system (DESIGN_RULES §3) ───────────────────────────────────────────
-// Football-themed: pitch green primary, gold accent, red for live. Never pure #000/#FFF.
+// Stadium-themed: navy pitch-at-night background, gold (FIFA World Cup) primary/accent,
+// red for live. Never pure #000/#FFF.
 export const Colors = {
   light: {
-    text: '#111827', // neutral-900
-    textSecondary: '#60646C', // neutral-600
-    textHint: '#9CA3AF', // neutral-400
-    background: '#F9FAFB', // neutral-50 (offset, not pure white)
+    text: '#10131C', // near-navy-900, not pure black
+    textSecondary: '#5B6472', // navy-600
+    textHint: '#9AA3B2', // navy-400
+    background: '#EEF1F8', // cool offset white, not pure white
     card: '#FFFFFF',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    border: '#E5E7EB', // neutral-200
-    primary: '#15803D', // pitch green
-    primaryDark: '#166534',
+    backgroundElement: '#E3E7F0',
+    backgroundSelected: '#D8DEEC',
+    border: '#D8DCE6',
+    primary: '#B8860B', // gold, darkened for 4.5:1 contrast on light bg
+    primaryDark: '#92660A',
     onPrimary: '#FFFFFF',
-    accent: '#F59E0B', // gold — 1 per screen, used sparingly
+    accent: '#1E3A8A', // navy accent — 1 per screen, used sparingly
     success: '#16A34A',
     warning: '#D97706',
     error: '#DC2626',
     info: '#2563EB',
-    live: '#EF4444', // live match red
+    live: '#DC2626', // live match red
   },
   dark: {
-    text: '#F9FAFB',
-    textSecondary: '#B0B4BA',
-    textHint: '#6B7280',
-    background: '#0B0F14', // offset, not pure black
-    card: '#16181D',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    border: '#2A2E35',
-    primary: '#22C55E',
-    primaryDark: '#16A34A',
-    onPrimary: '#06210F',
+    text: '#F8FAFC',
+    textSecondary: '#9CA8BD',
+    textHint: '#647089',
+    background: '#070B14', // stadium-at-night navy, not pure black
+    card: '#121A2C',
+    backgroundElement: '#1A2336',
+    backgroundSelected: '#26314A',
+    border: '#22304A',
+    primary: '#F5C451', // FIFA gold
+    primaryDark: '#D4A017',
+    onPrimary: '#1A1306',
     accent: '#FBBF24',
     success: '#22C55E',
     warning: '#F59E0B',

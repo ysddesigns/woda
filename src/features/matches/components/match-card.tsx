@@ -1,3 +1,5 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { memo } from 'react';
@@ -23,12 +25,16 @@ function stageLabel(match: Match): string {
 export const MatchCard = memo(function MatchCard({ match }: { match: Match }) {
   const theme = useTheme();
   const showScore = match.status !== 'upcoming';
+  const homeWins = showScore && match.homeScore !== null && match.awayScore !== null && match.homeScore > match.awayScore;
+  const awayWins = showScore && match.homeScore !== null && match.awayScore !== null && match.awayScore > match.homeScore;
 
   return (
     <Link href={{ pathname: '/game/[id]', params: { id: match.id } }} asChild>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${match.home.name} versus ${match.away.name}, ${stageLabel(match)}`}
+        onPressIn={() => Haptics.selectionAsync()}
+        android_ripple={{ color: theme.backgroundSelected }}
         style={({ pressed }) => [
           styles.card,
           { backgroundColor: theme.card, borderColor: theme.border },
@@ -37,38 +43,48 @@ export const MatchCard = memo(function MatchCard({ match }: { match: Match }) {
         <View style={styles.header}>
           <Text style={[styles.stage, { color: theme.textSecondary }]} numberOfLines={1}>
             {stageLabel(match)}
+            {match.matchday ? ` · Matchday ${match.matchday}` : ''}
           </Text>
           <StatusBadge match={match} />
         </View>
 
-        <View style={styles.teams}>
-          <TeamRow team={match.home} score={match.homeScore} showScore={showScore} />
-          <TeamRow team={match.away} score={match.awayScore} showScore={showScore} />
+        <View style={styles.scoreboard}>
+          <TeamColumn team={match.home} />
+          <View style={styles.scoreCenter}>
+            {showScore ? (
+              <Text style={[styles.score, { color: theme.text }]} selectable>
+                <Text style={homeWins ? { color: theme.primary } : undefined}>{match.homeScore ?? '–'}</Text>
+                <Text style={{ color: theme.textSecondary }}> : </Text>
+                <Text style={awayWins ? { color: theme.primary } : undefined}>{match.awayScore ?? '–'}</Text>
+              </Text>
+            ) : (
+              <Text style={[styles.vs, { color: theme.textSecondary }]}>vs</Text>
+            )}
+          </View>
+          <TeamColumn team={match.away} />
         </View>
 
         {match.venue ? (
-          <Text style={[styles.venue, { color: theme.textHint }]} numberOfLines={1}>
-            {match.venue.name} · {match.venue.city}
-          </Text>
+          <View style={styles.venueRow}>
+            <Ionicons name="location-outline" size={12} color={theme.textHint} />
+            <Text style={[styles.venue, { color: theme.textHint }]} numberOfLines={1}>
+              {match.venue.name}, {match.venue.city}
+            </Text>
+          </View>
         ) : null}
       </Pressable>
     </Link>
   );
 });
 
-function TeamRow({ team, score, showScore }: { team: MatchTeam; score: number | null; showScore: boolean }) {
+function TeamColumn({ team }: { team: MatchTeam }) {
   const theme = useTheme();
   return (
-    <View style={styles.teamRow}>
+    <View style={styles.teamCol}>
       <Flag team={team} />
-      <Text style={[styles.teamName, { color: theme.text }]} numberOfLines={1}>
+      <Text style={[styles.teamName, { color: theme.text }]} numberOfLines={2}>
         {team.name}
       </Text>
-      {showScore ? (
-        <Text style={[styles.score, { color: theme.text, fontVariant: ['tabular-nums'] }]} selectable>
-          {score ?? '–'}
-        </Text>
-      ) : null}
     </View>
   );
 }
@@ -89,14 +105,10 @@ function Flag({ team }: { team: MatchTeam }) {
   // Placeholder fallback (initials on brand color) — never default grey (DESIGN_RULES §9).
   return (
     <View style={[styles.flag, styles.flagFallback, { backgroundColor: theme.backgroundElement }]}>
-      <Text style={[styles.flagInitials, { color: theme.textSecondary }]}>
-        {team.fifaCode ?? '?'}
-      </Text>
+      <Text style={[styles.flagInitials, { color: theme.textSecondary }]}>{team.fifaCode ?? '?'}</Text>
     </View>
   );
 }
-
-const FLAG_WIDTH = 28;
 
 const styles = StyleSheet.create({
   card: {
@@ -104,7 +116,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderCurve: 'continuous',
     padding: Spacing.lg,
-    gap: Spacing.md,
+    gap: Spacing.lg,
     boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
   },
   pressed: {
@@ -124,17 +136,20 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  teams: {
-    gap: Spacing.md,
-  },
-  teamRow: {
+  scoreboard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  teamCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   flag: {
-    width: FLAG_WIDTH,
-    height: FLAG_WIDTH * 0.7,
+    width: 32,
+    height: 23,
     borderRadius: 4,
     borderCurve: 'continuous',
   },
@@ -147,15 +162,29 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.bold,
   },
   teamName: {
-    flex: 1,
-    fontSize: FontSize.md,
-    fontWeight: FontWeight.medium,
+    fontSize: FontSize.sm,
+    fontWeight: FontWeight.semibold,
+    textAlign: 'center',
+  },
+  scoreCenter: {
+    minWidth: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   score: {
-    fontSize: FontSize.lg,
+    fontSize: FontSize.xl,
     fontWeight: FontWeight.bold,
-    minWidth: 20,
-    textAlign: 'right',
+    fontVariant: ['tabular-nums'],
+  },
+  vs: {
+    fontSize: FontSize.base,
+    fontWeight: FontWeight.medium,
+  },
+  venueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
   },
   venue: {
     fontSize: FontSize.xs,

@@ -1,6 +1,7 @@
 import { parse } from 'date-fns';
 
 import type { ApiGame, ApiStadium, ApiTeam } from '@/api/types';
+import { parseScorers } from '@/features/matches/lib/parse-scorers';
 import type { Match, MatchStatus, MatchTeam } from '@/features/matches/types';
 
 const DATE_FORMAT = 'MM/dd/yyyy HH:mm';
@@ -57,7 +58,12 @@ export function normalizeGame(
     minute: status === 'live' ? game.time_elapsed : null,
     group: game.group,
     stage: game.type,
-    venue: stadium ? { name: stadium.fifa_name || stadium.name_en, city: stadium.city_en } : undefined,
+    matchday: game.matchday,
+    venue: stadium
+      ? { name: stadium.fifa_name || stadium.name_en, city: stadium.city_en, capacity: stadium.capacity }
+      : undefined,
+    homeScorers: parseScorers(game.home_scorers),
+    awayScorers: parseScorers(game.away_scorers),
   };
 }
 

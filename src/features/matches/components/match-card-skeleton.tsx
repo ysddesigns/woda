@@ -15,26 +15,34 @@ export function MatchCardSkeleton() {
   }, [shimmer]);
 
   const animatedStyle = useAnimatedStyle(() => ({ opacity: shimmer.value }));
-  const block = (w: number, h: number) => (
+  const block = (w: number, h: number, extra?: object) => (
     <Animated.View
-      style={[{ width: w, height: h, borderRadius: Radius.sm, backgroundColor: theme.backgroundElement }, animatedStyle]}
+      style={[
+        { width: w, height: h, borderRadius: Radius.sm, backgroundColor: theme.backgroundElement },
+        extra,
+        animatedStyle,
+      ]}
     />
   );
 
   return (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
       <View style={styles.header}>
-        {block(80, 12)}
-        {block(40, 16)}
+        {block(120, 12)}
+        {block(36, 18)}
       </View>
-      <View style={styles.row}>
-        {block(28, 20)}
-        {block(120, 16)}
+      <View style={styles.scoreboard}>
+        <View style={styles.teamCol}>
+          {block(32, 23)}
+          {block(64, 12)}
+        </View>
+        {block(48, 24)}
+        <View style={styles.teamCol}>
+          {block(32, 23)}
+          {block(64, 12)}
+        </View>
       </View>
-      <View style={styles.row}>
-        {block(28, 20)}
-        {block(100, 16)}
-      </View>
+      {block(140, 11, { alignSelf: 'center' })}
     </View>
   );
 }
@@ -45,16 +53,22 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderCurve: 'continuous',
     padding: Spacing.lg,
-    gap: Spacing.md,
+    gap: Spacing.lg,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  row: {
+  scoreboard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  teamCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
 });

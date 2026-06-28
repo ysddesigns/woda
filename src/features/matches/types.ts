@@ -1,5 +1,7 @@
 /** Normalized view-models for the matches feature (parsed from the raw API shapes). */
 
+import type { ScorerEvent } from '@/features/matches/lib/parse-scorers';
+
 export type MatchStatus = 'upcoming' | 'live' | 'finished';
 
 export type MatchTeam = {
@@ -22,7 +24,10 @@ export type Match = {
   minute: string | null;
   group: string;
   stage: string;
-  venue?: { name: string; city: string };
+  matchday: string;
+  venue?: { name: string; city: string; capacity?: number };
+  homeScorers: ScorerEvent[];
+  awayScorers: ScorerEvent[];
 };
 
 export type MatchBucket = 'past' | 'today' | 'upcoming';

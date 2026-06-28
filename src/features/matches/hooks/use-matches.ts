@@ -8,6 +8,7 @@ import type { Match, MatchBucket } from '@/features/matches/types';
 import { LIVE_STALE_TIME, STATIC_STALE_TIME } from '@/lib/query-client';
 
 export type UseMatchesResult = {
+  matches: Match[];
   buckets: Record<MatchBucket, Match[]>;
   allById: Map<string, Match>;
   isLoading: boolean;
@@ -52,6 +53,7 @@ export function useMatches(): UseMatchesResult {
   const allById = useMemo(() => new Map(matches.map((m) => [m.id, m])), [matches]);
 
   return {
+    matches,
     buckets,
     allById,
     // Reference data missing shouldn't block the screen — games drive loading/error.
