@@ -5,7 +5,8 @@ import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native
 import { StateView } from '@/components/state-view';
 import { BottomTabInset, FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import { BracketConnector } from '@/features/bracket/components/bracket-connector';
-import { BracketMatchCard } from '@/features/bracket/components/bracket-match-card';
+import { BracketMatchCard, isFullyPending } from '@/features/bracket/components/bracket-match-card';
+import { BracketRoadAhead } from '@/features/bracket/components/bracket-road-ahead';
 import { BracketTrophyNode } from '@/features/bracket/components/bracket-trophy-node';
 import type { BracketRound } from '@/features/bracket/lib/group-rounds';
 import { useTheme } from '@/hooks/use-theme';
@@ -81,8 +82,19 @@ export function BracketBoard({
     );
   }
 
-  const lastRound = rounds[rounds.length - 1];
-  const showTrophy = lastRound.key === 'f' && lastRound.matches.length === 1;
+  // A round only earns its own column once at least one slot is known. Rounds that are
+  // still 100% TBD (e.g. every stage after the one currently being played) get bundled
+  // into a single "what's coming" card instead of a wall of near-blank placeholder cards.
+  const frontierIndex = rounds.reduce(
+    (last, round, i) => (round.matches.some((m) => !isFullyPending(m)) ? i : last),
+    -1,
+  );
+  const activeRounds = rounds.slice(0, frontierIndex + 1);
+  const futureRounds = rounds.slice(frontierIndex + 1);
+  const revealedByRound = activeRounds.map((round) => round.matches.filter((m) => !isFullyPending(m)));
+
+  const lastActive = activeRounds[activeRounds.length - 1];
+  const showTrophy = !!lastActive && lastActive.key === 'f' && lastActive.matches.length === 1;
 
   return (
     <ScrollView
@@ -92,10 +104,12 @@ export function BracketBoard({
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.textSecondary} />
       }>
       <ScrollView horizontal contentContainerStyle={styles.content} showsHorizontalScrollIndicator={false}>
-        {rounds.map((round, roundIndex) => {
+        {activeRounds.map((round, roundIndex) => {
           const isFinal = round.key === 'f';
-          const nextRound = rounds[roundIndex + 1];
-          const canConnect = nextRound ? isDirectPairing(round, nextRound) : false;
+          const revealed = revealedByRound[roundIndex];
+          const pendingCount = round.matches.length - revealed.length;
+          const nextRound = activeRounds[roundIndex + 1];
+          const canConnect = nextRound ? isDirectPairing({ ...round, matches: revealed }, nextRound) : false;
 
           return (
             <Fragment key={round.key}>
@@ -115,14 +129,22 @@ export function BracketBoard({
                   </Text>
                 </View>
                 <View style={styles.cards}>
-                  {round.matches.map((match, index) => (
+                  {revealed.map((match, index) => (
                     <BracketMatchCard key={match.id} match={match} index={index} isFinal={isFinal} />
                   ))}
+                  {pendingCount > 0 ? (
+                    <View style={[styles.tbdPill, { borderColor: theme.border }]}>
+                      <Ionicons name="hourglass-outline" size={14} color={theme.textHint} />
+                      <Text style={[styles.tbdPillText, { color: theme.textHint }]}>
+                        +{pendingCount} matchup{pendingCount === 1 ? '' : 's'} TBD
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
               </View>
               {nextRound ? (
                 canConnect ? (
-                  <BracketConnector sourceMatches={round.matches} />
+                  <BracketConnector sourceMatches={revealed} />
                 ) : (
                   <View style={styles.spacer} />
                 )
@@ -130,10 +152,11 @@ export function BracketBoard({
             </Fragment>
           );
         })}
+        {futureRounds.length > 0 ? <BracketRoadAhead rounds={futureRounds} /> : null}
         {showTrophy ? (
           <>
-            <BracketConnector sourceMatches={[lastRound.matches[0]]} />
-            <BracketTrophyNode match={lastRound.matches[0]} />
+            <BracketConnector sourceMatches={[lastActive.matches[0]]} />
+            <BracketTrophyNode match={lastActive.matches[0]} />
           </>
         ) : null}
       </ScrollView>
@@ -194,5 +217,20 @@ const styles = StyleSheet.create({
   },
   cards: {
     gap: Spacing.md,
+  },
+  tbdPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderStyle: 'dashed',
+    alignSelf: 'flex-start',
+  },
+  tbdPillText: {
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.medium,
   },
 });

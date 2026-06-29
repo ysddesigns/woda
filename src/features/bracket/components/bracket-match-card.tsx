@@ -15,6 +15,11 @@ export const CARD_HEIGHT = 120;
 const STAGGER_STEP_MS = 60;
 const STAGGER_CAP = 5;
 
+/** Neither side is known yet — the slot exists structurally but has nothing to show. */
+export function isFullyPending(match: Match): boolean {
+  return match.home.isPlaceholder && match.away.isPlaceholder;
+}
+
 export function BracketMatchCard({
   match,
   index = 0,
@@ -30,7 +35,7 @@ export function BracketMatchCard({
     match.status === 'finished' && match.homeScore !== null && match.awayScore !== null && match.homeScore !== match.awayScore;
   const homeWon = isDecided && (match.homeScore as number) > (match.awayScore as number);
   const awayWon = isDecided && (match.awayScore as number) > (match.homeScore as number);
-  const isPending = match.home.isPlaceholder && match.away.isPlaceholder;
+  const isPending = isFullyPending(match);
 
   const delay = Math.min(index, STAGGER_CAP) * STAGGER_STEP_MS;
 
