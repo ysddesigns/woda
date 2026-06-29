@@ -18,8 +18,8 @@ import type { Match, MatchTeam } from '@/features/matches/types';
 import { useTheme } from '@/hooks/use-theme';
 import { isEnabled } from '@/lib/feature-flags';
 
-const STADIUM = require('../../../../assets/images/stadium.png');
-const FIREBALL = require('../../../../assets/images/fireball.png');
+const STADIUM = require('../../../../assets/images/stadium.webp');
+const FIREBALL = require('../../../../assets/images/fireball.webp');
 const HERO_HEIGHT = 220;
 
 export default function GameDetailScreen() {

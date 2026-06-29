@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { FontSize, FontWeight, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-const STADIUM_BG = require('../../../../assets/images/stadium.png');
+const STADIUM_BG = require('../../../../assets/images/stadium.webp');
 
 const HEADER_HEIGHT = 160;
 

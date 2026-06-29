@@ -70,6 +70,16 @@ const config: ExpoConfig = {
         locationWhenInUsePermission: 'Used to show how far you are from a World Cup venue. Optional — only requested when you tap "Show my distance".',
       },
     ],
+    [
+      'expo-build-properties',
+      {
+        android: {
+          minSdkVersion: 24,
+          enableProguardInReleaseBuilds: true,
+          enableShrinkResourcesInReleaseBuilds: true,
+        },
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

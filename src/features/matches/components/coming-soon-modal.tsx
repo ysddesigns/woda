@@ -5,7 +5,7 @@ import { Button } from '@/components/button';
 import { FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-const FIREBALL = require('../../../../assets/images/fireball.png');
+const FIREBALL = require('../../../../assets/images/fireball.webp');
 
 /** Polished "coming soon" modal — used where the API has no backing data (e.g. highlights video). */
 export function ComingSoonModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
