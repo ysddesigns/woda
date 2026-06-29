@@ -17,7 +17,7 @@ const config: ExpoConfig = {
     policy: 'appVersion',
   },
   ios: {
-    icon: './assets/expo.icon',
+    icon: './assets/images/icon.png',
     bundleIdentifier: 'com.kashify.woda',
     // Standard HTTPS only (no custom encryption) — skips the export-compliance prompt on
     // every build/submission. Revisit if the app ever adds its own crypto.
