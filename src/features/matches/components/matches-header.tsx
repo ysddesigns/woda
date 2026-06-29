@@ -6,7 +6,6 @@ import { FontSize, FontWeight, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 const STADIUM_BG = require('../../../../assets/images/stadium.png');
-const TROPHY = require('../../../../assets/images/worldcup.png');
 
 const HEADER_HEIGHT = 200;
 
@@ -37,15 +36,10 @@ export function MatchesHeader({ onSearchPress }: { onSearchPress?: () => void })
 
       <View style={styles.content}>
         <View style={styles.titleBlock}>
-          <Text style={[styles.brand, { color: theme.primary }]}>FIFA World Cup 26™</Text>
+          <Text style={[styles.brand, { color: theme.primary }]}>World Cup 2026</Text>
           <Text style={[styles.title, { color: theme.text }]}>Matches</Text>
         </View>
-        <Image
-          source={TROPHY}
-          style={styles.trophy}
-          contentFit="contain"
-          accessibilityLabel="FIFA World Cup trophy"
-        />
+        <Ionicons name="trophy" size={56} color={theme.primary} accessibilityLabel="Trophy" />
       </View>
     </View>
   );
@@ -99,9 +93,5 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSize['3xl'],
     fontWeight: FontWeight.bold,
-  },
-  trophy: {
-    width: 84,
-    height: 96,
   },
 });

@@ -18,7 +18,6 @@ import type { Match, MatchTeam } from '@/features/matches/types';
 import { useTheme } from '@/hooks/use-theme';
 import { isEnabled } from '@/lib/feature-flags';
 
-const TROPHY = require('../../../../assets/images/worldcup.png');
 const STADIUM = require('../../../../assets/images/stadium.png');
 const FIREBALL = require('../../../../assets/images/fireball.png');
 const HERO_HEIGHT = 220;
@@ -71,8 +70,8 @@ export default function GameDetailScreen() {
           />
         </View>
         <View style={styles.heroContent}>
-          <Image source={TROPHY} style={styles.trophy} contentFit="contain" accessibilityLabel="" />
-          <Text style={styles.brand}>FIFA World Cup 26™</Text>
+          <Ionicons name="trophy" size={40} color={theme.primary} />
+          <Text style={styles.brand}>World Cup 2026</Text>
         </View>
       </View>
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: Spacing.lg + insets.bottom }]}>
@@ -259,10 +258,6 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     gap: Spacing.xl,
     alignItems: 'center',
-  },
-  trophy: {
-    width: 40,
-    height: 46,
   },
   brand: {
     fontSize: FontSize.sm,

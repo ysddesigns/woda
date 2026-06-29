@@ -1,7 +1,8 @@
 import { SegmentedControl } from '@expo/ui/community/segmented-control';
 import Constants from 'expo-constants';
+import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -11,6 +12,7 @@ import { type ThemePreference, useSettingsStore } from '@/store/settings-store';
 
 const THEME_VALUES: ThemePreference[] = ['system', 'light', 'dark'];
 const THEME_LABELS = ['System', 'Light', 'Dark'];
+const PRIVACY_POLICY_URL = 'https://ysddesigns.github.io/woda/privacy/';
 
 export default function SettingsScreen() {
   const theme = useTheme();
@@ -81,6 +83,9 @@ export default function SettingsScreen() {
       <Section title="About">
         <Row label="Version" value={version} />
         <Row label="Data source" value="worldcup26.ir" />
+        <Pressable onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}>
+          <Text style={[styles.rowLabel, { color: theme.primary }]}>Privacy Policy</Text>
+        </Pressable>
         <Text style={[styles.note, { color: theme.textHint }]} selectable>
           Woda is an unofficial companion app. Match data is provided by the open worldcup26.ir
           API. No personal data is collected.

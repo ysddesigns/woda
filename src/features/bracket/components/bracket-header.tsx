@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -5,7 +6,6 @@ import { FontSize, FontWeight, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 const STADIUM_BG = require('../../../../assets/images/stadium.png');
-const TROPHY = require('../../../../assets/images/worldcup.png');
 
 const HEADER_HEIGHT = 160;
 
@@ -26,11 +26,11 @@ export function BracketHeader({ subtitle }: { subtitle: string }) {
 
       <View style={styles.content}>
         <View style={styles.titleBlock}>
-          <Text style={[styles.brand, { color: theme.primary }]}>FIFA World Cup 26™</Text>
+          <Text style={[styles.brand, { color: theme.primary }]}>World Cup 2026</Text>
           <Text style={[styles.title, { color: theme.text }]}>Knockout Stage</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{subtitle}</Text>
         </View>
-        <Image source={TROPHY} style={styles.trophy} contentFit="contain" accessibilityLabel="FIFA World Cup trophy" />
+        <Ionicons name="trophy" size={48} color={theme.primary} accessibilityLabel="Trophy" />
       </View>
     </View>
   );
@@ -79,9 +79,5 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: FontSize.sm,
     fontWeight: FontWeight.medium,
-  },
-  trophy: {
-    width: 64,
-    height: 72,
   },
 });
