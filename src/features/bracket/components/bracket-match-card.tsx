@@ -10,7 +10,8 @@ import { StatusBadge } from '@/features/matches/components/status-badge';
 import type { Match, MatchTeam } from '@/features/matches/types';
 import { useTheme } from '@/hooks/use-theme';
 
-const CARD_WIDTH = 224;
+export const CARD_WIDTH = 224;
+export const CARD_HEIGHT = 120;
 const STAGGER_STEP_MS = 60;
 const STAGGER_CAP = 5;
 
@@ -29,40 +30,61 @@ export function BracketMatchCard({
     match.status === 'finished' && match.homeScore !== null && match.awayScore !== null && match.homeScore !== match.awayScore;
   const homeWon = isDecided && (match.homeScore as number) > (match.awayScore as number);
   const awayWon = isDecided && (match.awayScore as number) > (match.homeScore as number);
+  const isPending = match.home.isPlaceholder && match.away.isPlaceholder;
 
   const delay = Math.min(index, STAGGER_CAP) * STAGGER_STEP_MS;
 
-  const borderColor = match.status === 'live' ? theme.live : isFinal ? theme.primary : theme.border;
+  const borderColor = isPending ? theme.border : match.status === 'live' ? theme.live : isFinal ? theme.primary : theme.border;
 
   return (
     <Animated.View entering={FadeInRight.duration(300).delay(delay)}>
       <Link href={{ pathname: '/game/[id]', params: { id: match.id } }} asChild>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${match.home.name} versus ${match.away.name}`}
-          onPressIn={() => Haptics.selectionAsync()}
+          accessibilityLabel={
+            isPending
+              ? 'Matchup not yet determined'
+              : `${match.home.name} versus ${match.away.name}`
+          }
+          disabled={isPending}
+          onPressIn={() => !isPending && Haptics.selectionAsync()}
           style={({ pressed }) => [
             styles.card,
             {
               backgroundColor: theme.card,
               borderColor,
               borderWidth: match.status === 'live' || isFinal ? 1.5 : StyleSheet.hairlineWidth,
+              borderStyle: isPending ? 'dashed' : 'solid',
               width: CARD_WIDTH,
             },
-            isFinal && { backgroundColor: theme.backgroundElement },
-            pressed && styles.pressed,
+            isFinal && !isPending && { backgroundColor: theme.backgroundElement },
+            isPending && styles.pendingCard,
+            pressed && !isPending && styles.pressed,
           ]}>
-          {isFinal ? (
-            <View style={styles.finalBadge}>
-              <Ionicons name="trophy" size={12} color={theme.primary} />
-              <Text style={[styles.finalBadgeText, { color: theme.primary }]}>FINAL</Text>
+          {isFinal && !isPending ? (
+            <View style={[styles.finalRibbon, { backgroundColor: theme.primary }]}>
+              <Ionicons name="trophy" size={10} color={theme.onPrimary} />
+              <Text style={[styles.finalRibbonText, { color: theme.onPrimary }]}>FINAL</Text>
             </View>
           ) : null}
-          <View style={styles.statusRow}>
-            <StatusBadge match={match} />
-          </View>
-          <TeamRow team={match.home} score={showScore ? match.homeScore : null} won={homeWon} lost={isDecided && !homeWon} />
-          <TeamRow team={match.away} score={showScore ? match.awayScore : null} won={awayWon} lost={isDecided && !awayWon} />
+          {isPending ? (
+            <View style={styles.pendingContent}>
+              <Ionicons name="hourglass-outline" size={18} color={theme.textHint} />
+              <Text style={[styles.pendingText, { color: theme.textHint }]} numberOfLines={2}>
+                {match.home.name === 'TBD' && match.away.name === 'TBD'
+                  ? 'Matchup not yet decided'
+                  : `${match.home.name} vs ${match.away.name}`}
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.statusRow}>
+                <StatusBadge match={match} />
+              </View>
+              <TeamRow team={match.home} score={showScore ? match.homeScore : null} won={homeWon} lost={isDecided && !homeWon} />
+              <TeamRow team={match.away} score={showScore ? match.awayScore : null} won={awayWon} lost={isDecided && !awayWon} />
+            </>
+          )}
         </Pressable>
       </Link>
     </Animated.View>
@@ -114,28 +136,48 @@ function TeamRow({
 
 const styles = StyleSheet.create({
   card: {
+    height: CARD_HEIGHT,
     borderRadius: Radius.lg,
     borderCurve: 'continuous',
     padding: Spacing.md,
     gap: Spacing.sm,
+    justifyContent: 'center',
   },
   pressed: {
     transform: [{ scale: 0.98 }],
     opacity: 0.95,
   },
+  pendingCard: {
+    opacity: 0.7,
+  },
+  pendingContent: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+  },
+  pendingText: {
+    fontSize: FontSize.sm,
+    fontWeight: FontWeight.medium,
+    textAlign: 'center',
+  },
   statusRow: {
     alignItems: 'flex-start',
   },
-  finalBadge: {
+  finalRibbon: {
+    position: 'absolute',
+    top: -10,
+    right: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
-    alignSelf: 'flex-start',
+    gap: 3,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
   },
-  finalBadgeText: {
-    fontSize: FontSize.xs,
+  finalRibbonText: {
+    fontSize: 9,
     fontWeight: FontWeight.bold,
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   teamRow: {
     flexDirection: 'row',

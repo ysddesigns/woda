@@ -1,9 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Fragment } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StateView } from '@/components/state-view';
 import { BottomTabInset, FontSize, FontWeight, Radius, Spacing } from '@/constants/theme';
+import { BracketConnector } from '@/features/bracket/components/bracket-connector';
 import { BracketMatchCard } from '@/features/bracket/components/bracket-match-card';
+import { BracketTrophyNode } from '@/features/bracket/components/bracket-trophy-node';
 import type { BracketRound } from '@/features/bracket/lib/group-rounds';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -24,6 +27,11 @@ const ROUND_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   sf: 'flash-outline',
   f: 'trophy',
 };
+
+/** True when round B is the natural next stage that round A's matches merge into (A halves into B). */
+function isDirectPairing(a: BracketRound, b: BracketRound): boolean {
+  return a.matches.length >= 2 && a.matches.length % 2 === 0 && b.matches.length === a.matches.length / 2;
+}
 
 export function BracketBoard({
   rounds,
@@ -73,6 +81,9 @@ export function BracketBoard({
     );
   }
 
+  const lastRound = rounds[rounds.length - 1];
+  const showTrophy = lastRound.key === 'f' && lastRound.matches.length === 1;
+
   return (
     <ScrollView
       style={styles.verticalScroll}
@@ -81,32 +92,50 @@ export function BracketBoard({
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.textSecondary} />
       }>
       <ScrollView horizontal contentContainerStyle={styles.content} showsHorizontalScrollIndicator={false}>
-        {rounds.map((round) => {
+        {rounds.map((round, roundIndex) => {
           const isFinal = round.key === 'f';
+          const nextRound = rounds[roundIndex + 1];
+          const canConnect = nextRound ? isDirectPairing(round, nextRound) : false;
+
           return (
-            <View key={round.key} style={styles.column}>
-              <View
-                style={[
-                  styles.chip,
-                  { backgroundColor: isFinal ? theme.primary + '1F' : theme.backgroundElement },
-                ]}>
-                <Ionicons
-                  name={ROUND_ICONS[round.key] ?? 'ellipse-outline'}
-                  size={13}
-                  color={isFinal ? theme.primary : theme.textSecondary}
-                />
-                <Text style={[styles.columnTitle, { color: isFinal ? theme.primary : theme.textSecondary }]}>
-                  {round.label.toUpperCase()}
-                </Text>
+            <Fragment key={round.key}>
+              <View style={styles.column}>
+                <View
+                  style={[
+                    styles.chip,
+                    { backgroundColor: isFinal ? theme.primary + '1F' : theme.backgroundElement },
+                  ]}>
+                  <Ionicons
+                    name={ROUND_ICONS[round.key] ?? 'ellipse-outline'}
+                    size={13}
+                    color={isFinal ? theme.primary : theme.textSecondary}
+                  />
+                  <Text style={[styles.columnTitle, { color: isFinal ? theme.primary : theme.textSecondary }]}>
+                    {round.label.toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.cards}>
+                  {round.matches.map((match, index) => (
+                    <BracketMatchCard key={match.id} match={match} index={index} isFinal={isFinal} />
+                  ))}
+                </View>
               </View>
-              <View style={styles.cards}>
-                {round.matches.map((match, index) => (
-                  <BracketMatchCard key={match.id} match={match} index={index} isFinal={isFinal} />
-                ))}
-              </View>
-            </View>
+              {nextRound ? (
+                canConnect ? (
+                  <BracketConnector sourceMatches={round.matches} />
+                ) : (
+                  <View style={styles.spacer} />
+                )
+              ) : null}
+            </Fragment>
           );
         })}
+        {showTrophy ? (
+          <>
+            <BracketConnector sourceMatches={[lastRound.matches[0]]} />
+            <BracketTrophyNode match={lastRound.matches[0]} />
+          </>
+        ) : null}
       </ScrollView>
     </ScrollView>
   );
@@ -141,7 +170,10 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    gap: Spacing.xl,
+    alignItems: 'flex-start',
+  },
+  spacer: {
+    width: Spacing.xl,
   },
   column: {
     gap: Spacing.md,
@@ -150,9 +182,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
+    height: 28,
     gap: Spacing.xs,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
   },
   columnTitle: {
