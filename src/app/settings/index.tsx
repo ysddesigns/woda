@@ -91,6 +91,15 @@ export default function SettingsScreen() {
           API. No personal data is collected.
         </Text>
       </Section>
+
+      <View style={styles.footer}>
+        <Text style={[styles.footerText, { color: theme.textHint }]}>
+          Powered by Kashify Technologies
+        </Text>
+        <Text style={[styles.footerText, { color: theme.textHint }]}>
+          Built with ❤️ by Yusuff Smart
+        </Text>
+      </View>
     </ScrollView>
   );
 }
@@ -159,5 +168,13 @@ const styles = StyleSheet.create({
   note: {
     fontSize: FontSize.sm,
     lineHeight: 20,
+  },
+  footer: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingTop: Spacing.sm,
+  },
+  footerText: {
+    fontSize: FontSize.xs,
   },
 });
